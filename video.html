@@ -1,0 +1,163 @@
+<!DOCTYPE html> 
+<html> 
+<head>
+<meta charset="UTF-8">
+<style type="text/css">
+		body{
+			background-image:url("./css/bg.png");
+		}
+		.ctr_btn{
+			cursor:pointer;
+		}
+</style>
+<script type="text/javascript" src="jquery.js"></script>
+</head>
+<body> 
+<h2 style="text-align:center;">HTML5 多媒体播放器</h1>
+<div id="evn" style="width:1183px; height:524px; background-image:url('./css/evn.jpg');margin:auto; overflow:hidden; margin-top: 0px;">
+	<div id="screen" style="width:667px; height:300px;background-image:url('./css/screen.jpg');overflow:hidden;margin-left: 245px; margin-top:87px;">
+		<div style="width:625px; height:270px; background:black; margin:auto; margin-top:12px; overflow:hidden;">
+		<video id="video1" width="600px" height="270px" style="background:black;">
+			Your browser does not support HTML5 video.
+	  </video>
+	  <canvas id="canvas" width="600px" height="270px" style="margin-left:-600px;" ></canvas>
+		</div>
+	</div>
+	<div id="buttons" style="text-align:center;">
+	<br />
+	<br />
+	<br />
+	  <input type="file" id="files" name="files[]" multiple="" style="">
+	  <!--<span id="nowtime"></span>/<span id="alltime"></span>-->
+	  <img src="./button/start.png"  id="start" class="ctr_btn" width="50px" height="50px"  onclick="playPause()" />
+	  <img src="./button/stop.png"  id="stop" class="ctr_btn" width="50px" height="50px"  />
+	  <img src="./button/goslower.png"  id="back" class="ctr_btn" width="50px" height="50px"  />
+	  <img src="./button/gofaster.png"  id="go" class="ctr_btn" width="50px" height="50px"  />
+		<button id="wb">黑白模式</button>
+	</div> 
+	<div  style="position:absolute; height:90px; width:45px; top:150px; left:1100px;">
+	<img id="light" src="./button/off.png"  id="light" class="ctr_btn" width="50px" height="50px"  />
+	</div>
+</div>
+
+
+<div id="footer" style="width:800px; height:20px; margin:auto; margin-top:30px;">
+<div id="info" style="text-align:center; font-weight:bold;">Made By Messy Ji</div>
+</div>
+
+<script type="text/javascript">
+var myVideo=document.getElementById("video1");
+function playPause()
+{ 
+if (myVideo.paused) 
+  myVideo.play(); 
+else 
+  myVideo.pause(); 
+} 
+function handleFileSelect(evt) {
+	var files = evt.target.files;
+	var f = files[0];
+	myVideo.src = (window.webkitURL ? webkitURL : URL).createObjectURL(f);
+	start = false;
+	$("#start").attr("src", "./button/start.png");
+	//time = new Date();
+	//setInterval(function(){captureImage()},5);
+}
+document.getElementById('files').addEventListener('change', handleFileSelect, false);
+var start = false;
+$("#start").click(function(){
+	if(start == false){
+		start = true;
+		$(this).attr("src", "./button/suspend.png");
+	}else{
+		start = false;
+		$(this).attr("src", "./button/start.png");
+	}
+});
+
+$("#stop").click(function(){
+	myVideo.currentTime = 0;
+	myVideo.pause();
+	start = false;
+	$("#start").attr("src", "./button/start.png")
+});
+var isLight = false;
+$("#light").click(function(){
+	if(isLight == false){
+		isLight = true;
+		$(this).attr("src", "./button/on.png");
+		$("body").css("background","black");
+		$("#evn").css("background","black");
+		$("#buttons").css("opacity", "0.3");
+	}
+	else{
+		isLight = false;
+		$(this).attr("src", "./button/off.png");
+		$("body").css("background","url('./css/bg.png')");
+		$("#evn").css("background","url('./css/evn.jpg')");
+		$("#buttons").css("opacity", "1");
+	}
+});
+$("#go").click(function(){
+	myVideo.currentTime = myVideo.currentTime + 5;
+});
+$("#back").click(function(){
+	myVideo.currentTime = myVideo.currentTime - 5;
+});
+var nowtime = 0;
+var alltime = 0;
+function showtime(){
+	nowtime = myVideo.currentTime;
+	$("#nowtime").text(nowtime);
+	alltime = myVideo.duration;
+	$("#alltime").text(alltime);
+}
+//setInterval(showtime,20);
+
+var isWhite = false;
+var sw = 625;
+var sh = 270;
+var canvas;// = document.getElementById("canvas");
+var ctx;// = canvas.getContext('2d');
+//点击事件，开启黑白模式
+$("#wb").click(function(){
+	if(isWhite == false){
+		isWhite = true;
+		$(this).text("正常模式");
+		$("#video1").css("margin-left", "-600px");
+		$("#canvas").show();
+		$("#canvas").css("margin-left", "0");
+		canvas = document.getElementById("canvas");
+		ctx = canvas.getContext('2d');
+		setInterval(function(){captureImage()},2);
+	}else{
+		isWhite = false;
+		$(this).text("黑白模式");
+		$("#video1").css("margin-left", "0");
+		//$("#canvas").css("margin-left", "-600px");
+		$("#canvas").hide();
+	}
+});
+captureImage = function() { 
+	ctx.drawImage(myVideo, 0, 0, sw, sh); 
+	var a = "";
+	var ImageData = ctx.getImageData(0, 0, sw, sh);
+	var data = ImageData.data;
+	var grey = 0;
+	var twidth = sw*4;
+	for(var i = 0; i < sh; ++i) {
+		for(var j = 0; j < twidth; j += 4) {
+			grey = (30*data[i*twidth + j] + 59*data[i*twidth + j + 1] +11*data[i*twidth + j +2] + 50)/100;
+			data[i*twidth + j] = grey;
+			data[i*twidth + j + 1] = grey;
+			data[i*twidth + j + 2] = grey;
+		}
+	}
+	ctx.putImageData(ImageData,0,0);
+	//fps.innerText = counter++ / (new Date() - time) * 1000;
+};
+</script> 
+
+</body> 
+</html>
+
