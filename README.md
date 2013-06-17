@@ -20,7 +20,6 @@ a simple multimedia player performed by HTML5
 	3. 具体使用的HTML5 video的接口有：
 			方法	play()		播放
 					pause()		暂停
-			
 			属性	currentTime		设置或返回音频/视频中的当前播放位置（以秒计）
 					duration			返回当前音频/视频的长度（以秒计）
 					currentSrc		返回当前音频/视频的 URL
